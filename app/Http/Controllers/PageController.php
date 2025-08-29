@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
@@ -14,8 +14,10 @@ class PageController extends Controller
         return view('pages.about');
     }
 
-    public function services() {
-        return view('pages.services');
+    public function services()
+    {
+        $services = Service::all();
+        return view('pages.services', compact('services'));
     }
 
     public function contact() {
