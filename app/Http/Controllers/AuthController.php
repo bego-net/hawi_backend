@@ -18,16 +18,22 @@ class AuthController extends Controller
             'email' => ['required','email'],
             'password' => ['required'],
         ]);
-
+    
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('home');
+    
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');  // ✅ admin goes here
+            } else {
+                return redirect()->route('home');  // ✅ normal users go here
+            }
         }
-
+    
         return back()->withErrors([
             'email' => 'Invalid credentials provided.',
         ]);
     }
+    
 
     public function showRegisterForm() {
         return view('auth.register');

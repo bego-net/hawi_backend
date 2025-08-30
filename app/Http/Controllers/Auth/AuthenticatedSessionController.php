@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Handle an incoming authentication (login) request.
+     * Handle an incoming authentication (login) request (WEB).
      */
     public function store(Request $request)
     {
@@ -18,25 +18,23 @@ class AuthenticatedSessionController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Invalid login details'
-            ], 401);
+        // ✅ Use credentials array for cleaner Auth::attempt
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials, $request->filled('remember'))) {
+            return back()->withErrors([
+                'email' => 'Invalid login details',
+            ]);
         }
 
-        $user = $request->user();
+        $request->session()->regenerate();
 
-        // Revoke old tokens
-        $user->tokens()->delete();
+        // ✅ Redirect based on role
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard'); // Admin → /admin
+        }
 
-        // Create new token
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user'    => $user,
-            'token'   => $token,
-        ]);
+        return redirect()->intended('/home'); // Normal user → /home
     }
 
     /**
@@ -44,10 +42,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
-        $request->user()->tokens()->delete();
+        Auth::guard('web')->logout();
 
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login'); // redirect to login page
     }
 }
