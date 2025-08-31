@@ -51,6 +51,9 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     // ✅ Custom route for updating service status
     Route::patch('services/{service}/status', [AdminServiceController::class, 'updateStatus'])->name('services.updateStatus');
 
-    // ✅ Contact Management
-    Route::get('contacts', [AdminContactController::class, 'index'])->name('contacts.index');
+   // ✅ Contact Management
+   Route::get('contacts', [AdminContactController::class, 'index'])->name('contacts.index');
+   Route::get('contacts/{id}', [AdminContactController::class, 'show'])->name('contacts.show'); // view single message
+   Route::post('contacts/{id}/respond', [AdminContactController::class, 'respond'])->name('contacts.respond'); // send response
+
 });

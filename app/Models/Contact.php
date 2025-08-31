@@ -9,7 +9,7 @@ class Contact extends Model
 {
     use HasFactory;
 
-    // Table name (optional, Laravel auto uses "contacts")
+    // Table name (optional, Laravel already assumes "contacts")
     protected $table = 'contacts';
 
     // Mass assignable attributes
@@ -19,4 +19,12 @@ class Contact extends Model
         'subject',
         'message',
     ];
+
+    /**
+     * A contact message can have many admin responses
+     */
+    public function responses()
+    {
+        return $this->hasMany(ContactResponse::class);
+    }
 }
