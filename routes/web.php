@@ -8,6 +8,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\ServiceController;
 
 // ================== ADMIN CONTROLLERS ==================
 use App\Http\Controllers\Admin\AdminController;
@@ -28,7 +29,10 @@ use App\Http\Controllers\User\ProfileController;
 // ================== PUBLIC PAGES ==================
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
-Route::get('/services', [PageController::class, 'services'])->name('services');
+
+// ================== PUBLIC SERVICES ==================
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
 
 // ================== CONTACT PAGE ==================
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');   // Show form
@@ -36,16 +40,10 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 // ================== BLOG ==================
 // Public blog pages (index & show)
-Route::resource('blog', BlogController::class)->only(['index', 'show']); 
-
-// Add missing create & store routes for public blogs
-// ================== BLOG ==================
-// Public blog pages: index, show, create, store
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/create', [BlogController::class, 'create'])->name('blog.create');
 Route::post('/blog', [BlogController::class, 'store'])->name('blog.store');
 Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
-
 
 // ================== AUTHENTICATION ==================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -58,44 +56,42 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
 
-
 // ================== ADMIN DASHBOARD (Protected) ==================
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    // ✅ Main Admin Dashboard
+    // Main Admin Dashboard
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // ✅ User Management
+    // User Management
     Route::resource('users', UserController::class);
 
-    // ✅ Blog Management
+    // Blog Management
     Route::resource('blogs', AdminBlogController::class);
 
-    // ✅ Service Requests Management
+    // Service Requests Management
     Route::resource('services', AdminServiceController::class);
     Route::patch('services/{service}/status', [AdminServiceController::class, 'updateStatus'])->name('services.updateStatus');
 
-    // ✅ Contact Messages Management
+    // Contact Messages Management
     Route::get('contacts', [AdminContactController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [AdminContactController::class, 'show'])->name('contacts.show');
     Route::post('contacts/{id}/respond', [AdminContactController::class, 'respond'])->name('contacts.respond');
-}); // 👈 CLOSE admin group properly
-
+});
 
 // ================== USER DASHBOARD (Protected) ==================
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 
-    // ✅ Projects (CRUD)
+    // Projects (CRUD)
     Route::resource('projects', ProjectController::class);
 
-    // ✅ Service Requests
+    // Service Requests
     Route::resource('requests', ServiceRequestController::class)->except(['show']);
 
-    // ✅ Messaging with Support/Admin
+    // Messaging with Support/Admin
     Route::get('messages', [SupportMessageController::class, 'index'])->name('messages.index');
     Route::post('messages', [SupportMessageController::class, 'store'])->name('messages.store');
 
-    // ✅ Profile Management
+    // Profile Management
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 });
