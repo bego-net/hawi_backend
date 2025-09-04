@@ -20,11 +20,12 @@
 
         <div class="form-group">
             <label for="status">Status</label>
-            <select name="status" id="status" class="form-control" required>
-                <option value="pending" {{ $service->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="in-progress" {{ $service->status == 'in-progress' ? 'selected' : '' }}>In Progress</option>
-                <option value="completed" {{ $service->status == 'completed' ? 'selected' : '' }}>Completed</option>
+            <select name="status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
             </select>
+            
         </div>
 
         <button type="submit" class="btn btn-success">Update Service</button>

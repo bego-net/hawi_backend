@@ -18,7 +18,6 @@ class AuthenticatedSessionController extends Controller
             'password' => 'required|string',
         ]);
 
-        // ✅ Use credentials array for cleaner Auth::attempt
         $credentials = $request->only('email', 'password');
 
         if (!Auth::attempt($credentials, $request->filled('remember'))) {
@@ -29,12 +28,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // ✅ Redirect based on role
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('admin.dashboard'); // Admin → /admin
+        // 🔑 Call the authenticated() method instead of redirecting here
+        return $this->authenticated($request, Auth::user());
+    }
+
+    /**
+     * Redirect users after successful authentication.
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        if ($user->is_admin) {
+            return redirect()->route('admin.dashboard'); // ✅ Admin dashboard
         }
 
-        return redirect()->intended('/home'); // Normal user → /home
+        return redirect()->route('dashboard'); // ✅ Normal user dashboard
     }
 
     /**

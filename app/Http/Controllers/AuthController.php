@@ -13,27 +13,32 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request) {
+
+    public function login(Request $request)
+    {
         $credentials = $request->validate([
-            'email' => ['required','email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
     
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-    
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');  // ✅ admin goes here
-            } else {
-                return redirect()->route('home');  // ✅ normal users go here
+        
+            $user = Auth::user();
+            if ($user->is_admin) {
+                return redirect()->intended(route('admin.dashboard'));
             }
+        
+            return redirect()->intended(route('dashboard.index'));
         }
+        
     
         return back()->withErrors([
-            'email' => 'Invalid credentials provided.',
-        ]);
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
     
+
 
     public function showRegisterForm() {
         return view('auth.register');
@@ -41,20 +46,21 @@ class AuthController extends Controller
 
     public function register(Request $request) {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email'=> $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'role'     => 'user', // 👈 make sure default users get 'user' role
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        return redirect()->route('dashboard.index');
     }
 
     public function logout(Request $request) {

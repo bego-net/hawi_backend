@@ -18,11 +18,12 @@
 
         <div class="form-group mb-2">
             <label for="status">Status</label>
-            <select name="status" id="status" class="form-control" required>
+            <select name="status">
                 <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
+                <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
             </select>
+            
         </div>
 
         <button type="submit" class="btn btn-success mt-3">Create Service</button>

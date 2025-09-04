@@ -6,18 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
-{
-    Schema::table('services', function (Blueprint $table) {
-        $table->string('status')->default('pending'); // Add this line to add the status column
-    });
-}
-
-public function down()
-{
-    Schema::table('services', function (Blueprint $table) {
-        $table->dropColumn('status');
-    });
-}
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('user')->after('password'); // default = normal user
+        });
+    }
+    
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
+    }
+    
 
 };

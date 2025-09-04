@@ -9,19 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            $table->string('status')->default('pending'); // Add this line to add the status column
+            $table->string('title')->after('id');
+            $table->text('description')->nullable()->after('title');
+            $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending')->after('description');
         });
     }
     
-
-    public function down()
+    public function down(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn('status');
+            $table->dropColumn(['title', 'description', 'status']);
         });
     }
-
+    
 };

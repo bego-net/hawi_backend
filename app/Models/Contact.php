@@ -9,10 +9,9 @@ class Contact extends Model
 {
     use HasFactory;
 
-    // Table name (optional, Laravel already assumes "contacts")
+    // Laravel assumes the table name is "contacts"
     protected $table = 'contacts';
 
-    // Mass assignable attributes
     protected $fillable = [
         'name',
         'email',

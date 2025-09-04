@@ -6,16 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('contact_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contact_id')->constrained()->onDelete('cascade'); 
-            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade'); 
-            $table->text('response'); 
+            $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
+            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
+            $table->text('response');
             $table->timestamps();
         });
     }
+    
+
 
     public function down(): void
     {

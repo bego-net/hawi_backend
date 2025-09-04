@@ -3,17 +3,20 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class IsAdmin
 {
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'admin') {
-            return $next($request);
+        $user = $request->user();
+
+        if (!$user || !$user->is_admin) {
+            return redirect()->route('dashboard.index')
+                ->with('error', 'Admins only.');
         }
 
-        abort(403, 'Unauthorized action.');
+        return $next($request);
     }
 }
-

@@ -25,20 +25,18 @@ class ServiceController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'status' => 'required|in:pending,in-progress,completed',
+            'status' => 'required|in:pending,in_progress,completed',
         ]);
-    
+
         // Create the service
         Service::create([
             'title' => $request->title,
             'description' => $request->description,
             'status' => $request->status,
         ]);
-    
-        // Redirect to the services index page
+
         return redirect()->route('admin.services.index')->with('success', 'Service created successfully.');
     }
-    
 
     public function show(Service $service)
     {
@@ -47,46 +45,45 @@ class ServiceController extends Controller
 
     public function edit($id)
     {
-    // Find the service by ID
-    $service = Service::findOrFail($id);
-
-    // Return the edit view with the service data
-    return view('admin.services.edit', compact('service'));
+        $service = Service::findOrFail($id);
+        return view('admin.services.edit', compact('service'));
     }
 
     public function update(Request $request, $id)
     {
-        // Validate the incoming request
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'status' => 'required|in:pending,in-progress,completed',
+            'status' => 'required|in:pending,in_progress,completed',
         ]);
-    
-        // Find the service by ID
+
         $service = Service::findOrFail($id);
-    
-        // Update the service fields
         $service->title = $request->title;
         $service->description = $request->description;
         $service->status = $request->status;
-    
-        // Save the updated service to the database
         $service->save();
-    
-        // Redirect to the services index with a success message
+
         return redirect()->route('admin.services.index')->with('success', 'Service updated successfully.');
     }
-    
 
     public function destroy($id)
-{
-    // Find the service by ID and delete it
-    $service = Service::findOrFail($id);
-    $service->delete();
+    {
+        $service = Service::findOrFail($id);
+        $service->delete();
+        return redirect()->route('admin.services.index')->with('success', 'Service deleted successfully.');
+    }
 
-    // Redirect to the service index page with success message
-    return redirect()->route('admin.services.index')->with('success', 'Service deleted successfully.');
-}
+    // **New method for updating status**
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
 
+        $service = Service::findOrFail($id);
+        $service->status = $request->status;
+        $service->save();
+
+        return redirect()->back()->with('success', 'Service status updated successfully.');
+    }
 }

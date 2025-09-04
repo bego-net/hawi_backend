@@ -11,52 +11,45 @@ use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
-    /**
-     * Show all contact messages.
-     */
+    // ✅ Show all messages
     public function index()
-    {
-        $contacts = Contact::latest()->paginate(10);
-        return view('admin.contacts.index', compact('contacts'));
-    }
+{
+    $contacts = Contact::latest()->paginate(10);
+    return view('admin.contacts.index', compact('contacts'));
+}
 
-    /**
-     * Show a single contact message with responses.
-     */
+
+    // ✅ Show single message
     public function show($id)
-    {
-        $contact = Contact::with('responses.admin')->findOrFail($id);
-        return view('admin.contacts.show', compact('contact'));
-    }
+{
+    $contact = Contact::findOrFail($id);
+    return view('admin.contacts.show', compact('contact'));
+}
 
-    /**
-     * Store admin response & send email to the user.
-     */
+
+    // ✅ Respond to message
     public function respond(Request $request, $id)
     {
         $request->validate([
             'response' => 'required|string|max:5000',
         ]);
 
-        $contact = Contact::findOrFail($id);
+        $message = Contact::findOrFail($id);
 
-        // Save response in DB
-        $response = ContactResponse::create([
-            'contact_id' => $contact->id,
-            'admin_id'   => Auth::id(),
-            'response'   => $request->response,
-        ]);
+        // Store response
+        $response = new ContactResponse();
+        $response->contact_id = $message->id;
+        $response->admin_id = Auth::id();
+        $response->response = $request->response;
+        $response->save();
 
-        // Send response email to the user
-        Mail::raw(
-            "Hello {$contact->name},\n\nWe have responded to your message:\n\n{$response->response}\n\nBest regards,\nYour Support Team",
-            function ($message) use ($contact) {
-                $message->to($contact->email)
-                        ->subject("Response to your contact message");
-            }
-        );
+        // Optionally send email to user
+        Mail::raw($request->response, function ($mail) use ($message) {
+            $mail->to($message->email)
+                 ->subject("Response to: {$message->subject}");
+        });
 
-        return redirect()->route('admin.contacts.show', $contact->id)
-                         ->with('success', 'Response saved & emailed successfully.');
+        return redirect()->route('admin.contacts.show', $id)
+                         ->with('success', 'Response sent successfully.');
     }
 }
